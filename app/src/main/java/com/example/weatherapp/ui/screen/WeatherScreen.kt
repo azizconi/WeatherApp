@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -17,21 +18,47 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherapp.R
+import com.example.weatherapp.data.responses.ArticlesList
 import com.example.weatherapp.data.responses.ListWeather
+
+
+var listOfWeather: List<ArticlesList> = emptyList()
+
+
+fun setData(list: List<ArticlesList>){
+    listOfWeather = list
+
+
+}
+
+
+
+
+
+
+
+@Composable
+fun GetWeatherInfo(
+    viewModel: MainViewModel
+) {
+
+
+    Log.e("TAG", "GetWeatherInfo: $listOfWeather", )
+
+    val weather = viewModel.weather.observeAsState()
+    Log.e("TAG", "GetWeatherInfo: ${weather.value?.city?.name}", )
+
+    weather.value?.city?.name?.let { WeatherInfo(city = it) }
+}
 
 
 
 @Composable
 fun WeatherInfo(
     modifier: Modifier = Modifier,
-    list: String,
-
+    city: String,
 ) {
-    val viewModel: MainViewModel = viewModel(MainViewModel::class.java)
-    Log.e("TAG", "WeatherInfo: ${viewModel.weather.value?.city?.name}", )
 
-
-    Log.e("TAG", "WeatherInfo: $list", )
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -51,9 +78,9 @@ fun WeatherInfo(
     ) {
 
 
-        WeatherCity(city = "Душанбе")
+        WeatherCity(city = city)
         Temperature()
-
+        CurrentWeatherDate(date = "21.12.2021")
     }
 
 
@@ -105,12 +132,13 @@ fun WeatherCity(
 fun Temperature(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .padding(top = 25.dp)
+            .padding(top = 50.dp)
     ) {
 
         Row(
             modifier = modifier
-                .width(200.dp),
+                .width(200.dp)
+                .padding(start = 10.dp),
             verticalAlignment = Alignment.Bottom,
         ) {
 
@@ -152,16 +180,43 @@ fun Temperature(modifier: Modifier = Modifier) {
                     text = "27℃",
                     fontFamily = FontFamily(Font(R.font.robotothin)),
                     color = Color.White,
-                    fontSize = 16.sp
+                    fontSize = 17.sp
                 )
 
                 Text(
                     text = "10℃",
                     fontFamily = FontFamily(Font(R.font.robotothin)),
                     color = Color.White,
-                    fontSize = 16.sp
+                    fontSize = 17.sp
                 )
             }
         }
     }
 }
+
+
+@Composable
+fun CurrentWeatherDate(
+    modifier: Modifier = Modifier,
+    date: String
+) {
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+
+        Text(
+            text = date,
+            fontSize = 17.sp,
+            fontFamily = FontFamily(Font(R.font.robotoregular)),
+            color = Color.White
+        )
+
+    }
+
+
+}
+
+

@@ -11,7 +11,7 @@ interface Api {
     fun getListOfHeadLine(
         @Query("id") id: Int = 524901,
         @Query("appid") appid: String = "a29afaa689039c0515ffd15867329caf",
-        @Query("q") q: String = "Dushanbe",
+        @Query("q") q: String,
     ): Call<ListWeather>
 
 }

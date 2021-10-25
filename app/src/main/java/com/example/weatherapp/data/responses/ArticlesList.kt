@@ -1,14 +1,19 @@
 package com.example.weatherapp.data.responses
 
 
+import androidx.room.Entity
 import com.google.gson.annotations.SerializedName
 
+
 data class ArticlesList(
+
+
     @SerializedName("clouds")
     val clouds: Clouds,
     @SerializedName("dt")
     val dt: Int,
     @SerializedName("dt_txt")
+
     val dtTxt: String,
     @SerializedName("main")
     val main: Main,
