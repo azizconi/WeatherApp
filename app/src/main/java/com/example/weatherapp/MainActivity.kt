@@ -9,14 +9,14 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.LiveData
 import coil.annotation.ExperimentalCoilApi
 import com.example.weatherapp.data.responses.ArticlesList
-import com.example.weatherapp.data.responses.ListWeather
-import com.example.weatherapp.ui.screen.*
+import com.example.weatherapp.ui.screen.GetWeatherInfo
+import com.example.weatherapp.ui.screen.LazyListWeather
+import com.example.weatherapp.ui.screen.MainViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -24,6 +24,8 @@ import java.util.*
 class MainActivity : ComponentActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
+
+    private lateinit var list: LiveData<List<ArticlesList>>
 
 
 
@@ -34,44 +36,62 @@ class MainActivity : ComponentActivity() {
         viewModel.getWeatherList()
 
 
-//        viewModel.weather.observe(this, {
-//            setData(it)
-//        })
-
-
         setContent {
+
+
+
+
+
+
+
+
+
 
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
             ) {
+
+
                 Column {
+
+
                     GetWeatherInfo(viewModel)
-//                    WeatherInfo()
+
                     LazyListWeather(
                         modifier = Modifier,
-                        viewModel = viewModel,
-                    )
+                        viewModel = viewModel
+                    ){
+                        list = it
+                    }
+
+
+
+
+
                 }
             }
 
 
         }
+
+
     }
-
-
-    @SuppressLint("SimpleDateFormat")
-    fun getDate(articlesList: ArticlesList): String {
-        val date: Date = Date()
-        val format = "HH:mm"
-        val simpleDateFormat = SimpleDateFormat(format)
-
-        return simpleDateFormat.format(date)
-    }
-
-
 }
+
+
+@SuppressLint("SimpleDateFormat")
+fun getDate(articlesList: ArticlesList): String {
+    val date: Date = Date()
+    val format = "HH:mm"
+    val simpleDateFormat = SimpleDateFormat(format)
+
+    return simpleDateFormat.format(date)
+}
+
+
+
 
 
 

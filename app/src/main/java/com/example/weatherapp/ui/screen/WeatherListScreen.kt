@@ -9,13 +9,22 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.navArgument
 import coil.annotation.ExperimentalCoilApi
+import com.example.weatherapp.Screen
 import com.example.weatherapp.data.responses.ArticlesList
 import com.google.accompanist.coil.rememberCoilPainter
 import java.text.SimpleDateFormat
+
+
+
+
 
 
 @ExperimentalCoilApi
@@ -23,7 +32,9 @@ import java.text.SimpleDateFormat
 fun LazyListWeather(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
+    dataTransmission: (List<ArticlesList>) -> Unit
 ) {
+
 
     val weatherList = viewModel.listOfWeather.observeAsState()
 
@@ -34,16 +45,17 @@ fun LazyListWeather(
     ) {
 
 
-        var weather: List<ArticlesList> = emptyList()
-
-
         weatherList.value?.size?.let { it ->
+
+            dataTransmission(mutableListOf(weatherList.value!![0]))
+
             items(it) {
-                val temperature = ((weatherList.value!![it].main.temp - 273.15).toInt()).toString()
+                val temperature =
+                    ((weatherList.value!![it].main!!.temp - 273.15).toInt()).toString()
                 var icon = ""
 
-                weatherList.value!![it].weather[0].icon.let { it1 ->
-                    icon = it1
+                weatherList.value!![it].weather?.get(0)?.icon.let { it1 ->
+                    icon = it1.toString()
                 }
 
 
@@ -53,13 +65,17 @@ fun LazyListWeather(
 
                 val dateWeather = weatherList.value!![it].dtTxt
 
+
+
                 if (weatherList.value!![it] == weatherList.value!![0]) {
                     ItemWeatherList(
                         modifier = modifier
                             .clickable {
-                                Log.e("TAG", "LazyListWeather: $it", )
-                                weather = listOf(weatherList.value!![it])
-                                setData(weather)
+
+                                dataTransmission(mutableListOf(weatherList.value!![it]))
+
+//                                navigateWeather(list)
+
                             },
                         temperature = "$temperature℃",
                         icon = "https://openweathermap.org/img/wn/$icon@2x.png",
@@ -68,21 +84,20 @@ fun LazyListWeather(
 
                 }
 
-                if (weatherList.value!![it] != weatherList.value!![0]){
+                if (weatherList.value!![it] != weatherList.value!![0]) {
                     ItemWeatherList(
                         modifier = modifier
                             .clickable {
-                                Log.e("TAG", "LazyListWeather: $it", )
-                                weather = listOf(weatherList.value!![it])
-                                setData(weather)
+
+                                dataTransmission(mutableListOf(weatherList.value!![it]))
+
                             },
                         temperature = "$temperature℃",
                         icon = "https://openweathermap.org/img/wn/$icon@2x.png",
-                        timeWeather = getDate(dateWeather),
+                        timeWeather = getDate(dateWeather.toString()),
                     )
 
                 }
-
 
 
             }
@@ -102,11 +117,6 @@ fun ItemWeatherList(
     icon: String,
     timeWeather: String,
 ) {
-
-
-
-
-
 
 
     Column(

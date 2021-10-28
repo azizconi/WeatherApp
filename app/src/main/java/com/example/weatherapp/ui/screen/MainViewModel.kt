@@ -24,13 +24,14 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     var weatherIcon = MutableLiveData<Weather>()
 
 
+
+
+
+
+
     fun getWeatherList(){
         return setWeatherList()
     }
-
-
-
-
 
 
      private fun setWeatherList() {
@@ -53,6 +54,8 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         response.body().let {
                             weather.postValue(it)
                         }
+
+
 
 
 

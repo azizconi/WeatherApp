@@ -22,14 +22,8 @@ import com.example.weatherapp.data.responses.ArticlesList
 import com.example.weatherapp.data.responses.ListWeather
 
 
-var listOfWeather: List<ArticlesList> = emptyList()
 
 
-fun setData(list: List<ArticlesList>){
-    listOfWeather = list
-
-
-}
 
 
 
@@ -43,12 +37,15 @@ fun GetWeatherInfo(
 ) {
 
 
-    Log.e("TAG", "GetWeatherInfo: $listOfWeather", )
+
+
 
     val weather = viewModel.weather.observeAsState()
     Log.e("TAG", "GetWeatherInfo: ${weather.value?.city?.name}", )
 
-    weather.value?.city?.name?.let { WeatherInfo(city = it) }
+    weather.value?.city?.name?.let { WeatherInfo(city = it, viewModel = viewModel) }
+
+
 }
 
 
@@ -57,7 +54,12 @@ fun GetWeatherInfo(
 fun WeatherInfo(
     modifier: Modifier = Modifier,
     city: String,
+    viewModel: MainViewModel
 ) {
+
+
+
+
 
     Column(
         modifier = modifier
