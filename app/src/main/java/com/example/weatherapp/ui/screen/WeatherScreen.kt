@@ -1,11 +1,15 @@
 package com.example.weatherapp.ui.screen
 
-import android.util.Log
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,49 +20,41 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weatherapp.R
 import com.example.weatherapp.data.responses.ArticlesList
-import com.example.weatherapp.data.responses.ListWeather
-
-
-
-
-
-
-
-
-
+import com.example.weatherapp.viewModel.MainViewModel
+import com.google.accompanist.coil.rememberCoilPainter
+import com.example.weatherapp.ui.screen.ListCityScreen as ListCityScreen
 
 
 @Composable
 fun GetWeatherInfo(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    mainWeather: ArticlesList
 ) {
 
 
-
-
-
     val weather = viewModel.weather.observeAsState()
-    Log.e("TAG", "GetWeatherInfo: ${weather.value?.city?.name}", )
 
-    weather.value?.city?.name?.let { WeatherInfo(city = it, viewModel = viewModel) }
+    weather.value?.city?.name?.let {
+        WeatherInfo(
+            city = it,
+            articlesList = mainWeather,
+            viewModel = viewModel
+        )
+    }
 
 
 }
-
 
 
 @Composable
 fun WeatherInfo(
     modifier: Modifier = Modifier,
     city: String,
+    articlesList: ArticlesList,
     viewModel: MainViewModel
 ) {
-
-
-
 
 
     Column(
@@ -80,61 +76,103 @@ fun WeatherInfo(
     ) {
 
 
-        WeatherCity(city = city)
-        Temperature()
-        CurrentWeatherDate(date = "21.12.2021")
+        WeatherCity(city = city, viewModel = viewModel)
+        Temperature(articlesList = articlesList)
+
+        val getDate = articlesList.dtTxt.toString()
+
+
+        CurrentWeatherDate(date = getDate)
+
     }
 
 
 }
-
-
-
-
-
-
 
 
 @Composable
 fun WeatherCity(
     modifier: Modifier = Modifier,
-    city:String
+    city: String,
+    viewModel: MainViewModel
 ) {
 
 
+    var choiceCity by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-
+        modifier = modifier
+            .clickable {
+                choiceCity = !choiceCity
+            }
     ) {
 
-            Text(
-                text = city,
-                fontSize = 19.sp,
-                modifier = modifier
-                    .padding(top = 30.dp),
-                fontFamily = FontFamily(Font(R.font.robotolight)),
-                color = Color.White,
-            )
+        Text(
+            text = city,
+            fontSize = 19.sp,
+            modifier = modifier
+                .padding(top = 30.dp),
+            fontFamily = FontFamily(Font(R.font.robotolight)),
+            color = Color.White,
+        )
 
 
         Icon(
             painter = painterResource(id = R.drawable.kebab),
             contentDescription = "cities",
+
             Modifier
                 .height(24.dp)
                 .width(24.dp),
             Color.White
         )
+
+
+    }
+    if (choiceCity) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .padding(start = 75.dp, end = 75.dp)
+                .animateContentSize(
+                    animationSpec = tween(
+                        durationMillis = 600,
+                        easing = LinearOutSlowInEasing
+                    )
+                ),
+            backgroundColor = Color(0xFF31448B),
+        ) {
+
+            ListCityScreen(viewModel = viewModel)
+
+        }
     }
 
 }
 
 
 @Composable
-fun Temperature(modifier: Modifier = Modifier) {
+fun Temperature(
+    modifier: Modifier = Modifier,
+    articlesList: ArticlesList
+) {
+
+    val mainTemp = ((articlesList.main?.temp?.minus(273))?.toInt()).toString()
+
+    val weather = articlesList.weather?.get(0)?.main
+    val maxTemp = ((articlesList.main?.tempMax?.minus(273))?.toInt()).toString()
+    val minTemp = ((articlesList.main?.tempMin?.minus(273))?.toInt()).toString()
+
+
+
     Column(
         modifier = modifier
-            .padding(top = 50.dp)
+            .padding(top = 50.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         Row(
@@ -142,13 +180,16 @@ fun Temperature(modifier: Modifier = Modifier) {
                 .width(200.dp)
                 .padding(start = 10.dp),
             verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.Center
         ) {
 
             Text(
-                text = "19",
+                text = mainTemp,
                 fontSize = 80.sp,
                 fontFamily = FontFamily(Font(R.font.robotothin)),
-                color = Color.White
+                color = Color.White,
+                modifier = modifier
+
             )
 
             Column(modifier = modifier.height(90.dp)) {
@@ -172,25 +213,51 @@ fun Temperature(modifier: Modifier = Modifier) {
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Rain",
+                    text = weather.toString(),
                     fontFamily = FontFamily(Font(R.font.robotothin)),
                     color = Color.White,
                     fontSize = 22.sp
                 )
 
-                Text(
-                    text = "27℃",
-                    fontFamily = FontFamily(Font(R.font.robotothin)),
-                    color = Color.White,
-                    fontSize = 17.sp
-                )
+                Row {
+                    Icon(
+                        painter = rememberCoilPainter(request = "https://cdn.icon-icons.com/icons2/930/PNG/512/arrow-up_icon-icons.com_72374.png"),
+                        contentDescription = "iconWeather",
+                        modifier = modifier
+                            .size(17.dp)
+                            .padding(top = 5.dp),
+                        Color.White
 
-                Text(
-                    text = "10℃",
-                    fontFamily = FontFamily(Font(R.font.robotothin)),
-                    color = Color.White,
-                    fontSize = 17.sp
-                )
+                    )
+
+                    Text(
+                        text = "$maxTemp℃",
+                        fontFamily = FontFamily(Font(R.font.robotothin)),
+                        color = Color.White,
+                        fontSize = 17.sp
+                    )
+                }
+                Row {
+                    Icon(
+                        painter = rememberCoilPainter(request = "https://cdn.icon-icons.com/icons2/930/PNG/512/arrow-down_icon-icons.com_72377.png"),
+                        contentDescription = "iconWeather",
+                        modifier = modifier
+                            .size(17.dp)
+                            .padding(top = 5.dp),
+                        Color.White
+
+                    )
+
+
+                    Text(
+                        text = "$minTemp℃",
+                        fontFamily = FontFamily(Font(R.font.robotothin)),
+                        color = Color.White,
+                        fontSize = 17.sp
+                    )
+                }
+
+
             }
         }
     }
